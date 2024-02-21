@@ -131,7 +131,7 @@ class SegAPI(object):
     def init_model(self):
         # pidnet-s
         model = models.pidnet.PIDNet(m=2, n=3, num_classes=11, planes=32, ppm_planes=96, head_planes=128, augment=True)
-        model_state_file = '/mnt/cephfs/home/zhoukai/Codes/PIDNet/output/surgical_navigation_seg/pid_small_surgical_seg_trainall_11_class_mix/best.pt'
+        model_state_file = 'best.pt'
         pretrained_dict = torch.load(model_state_file)
         print('load model from {}'.format(model_state_file))
         if 'state_dict' in pretrained_dict:
