@@ -3,7 +3,7 @@ import torch
 import sys
 import os
 sys.path.append((os.path.dirname(__file__)))
-import models
+import seg_models
 import os
 import cv2
 from torch.nn import functional as F
@@ -134,7 +134,7 @@ class SegAPI(object):
     @classmethod
     def init_model(cls):
         # pidnet-s
-        model = models.pidnet.PIDNet(m=2, n=3, num_classes=11, planes=32, ppm_planes=96, head_planes=128, augment=True)
+        model = seg_models.pidnet.PIDNet(m=2, n=3, num_classes=11, planes=32, ppm_planes=96, head_planes=128, augment=True)
         model_state_file = 'best.pt'
         model_state_file = os.path.join(os.path.dirname(__file__), model_state_file)
         assert os.path.exists(model_state_file)
