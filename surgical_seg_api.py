@@ -1,5 +1,8 @@
 import numpy as np
 import torch
+import sys
+import os
+sys.path.append((os.path.dirname(__file__)))
 import models
 import os
 import cv2
@@ -128,10 +131,13 @@ class SegAPI(object):
         out = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
         return out, interact_1_345_flag, interact_8_910_flag
 
-    def init_model(self):
+    @classmethod
+    def init_model(cls):
         # pidnet-s
         model = models.pidnet.PIDNet(m=2, n=3, num_classes=11, planes=32, ppm_planes=96, head_planes=128, augment=True)
         model_state_file = 'best.pt'
+        model_state_file = os.path.join(os.path.dirname(__file__), model_state_file)
+        assert os.path.exists(model_state_file)
         pretrained_dict = torch.load(model_state_file)
         print('load model from {}'.format(model_state_file))
         if 'state_dict' in pretrained_dict:
