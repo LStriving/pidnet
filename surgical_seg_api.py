@@ -1,3 +1,4 @@
+import PIL
 import numpy as np
 import torch
 import sys
@@ -37,15 +38,21 @@ def get_palette(num_cls=20):
 class SegAPI(object):
     def __init__(self,
                  mean=[0.485, 0.456, 0.406],
-                 std=[0.229, 0.224, 0.225]):
-        self.model = self.init_model()
+                 std=[0.229, 0.224, 0.225],
+                 bgr=True,
+                 enable_trace=True,
+                 ):
+        self.model = self.init_model(enable_trace=enable_trace)
         self.mean = mean
         self.std = std
         palette = get_palette(num_cls=14)
         self.palette = palette[:3*5]+palette[3*6:3*10]+palette[3*12:3*13]+palette[3*11:3*12]
+        self.input_bgr = bgr
     
-    def input_transform(self, image, bgr=True):
-        if bgr:
+    def input_transform(self, image):
+        if isinstance(image, PIL.Image.Image):
+            image = np.array(image)
+        if self.input_bgr:
             image = image.astype(np.float32)[:, :, ::-1] # bgr->rgb
         else:
             image = image.astype(np.float32)
@@ -132,7 +139,7 @@ class SegAPI(object):
         return out, interact_1_345_flag, interact_8_910_flag
 
     @classmethod
-    def init_model(cls):
+    def init_model(cls, enable_trace=True):
         # pidnet-s
         model = seg_models.pidnet.PIDNet(m=2, n=3, num_classes=11, planes=32, ppm_planes=96, head_planes=128, augment=True)
         model_state_file = 'best.pt'
@@ -150,7 +157,11 @@ class SegAPI(object):
         device = torch.device('cuda')
         model.eval()
         model.to(device)
-
+        if enable_trace:
+            # trace
+            example = torch.rand(1, 3, 1080, 1920).cuda()
+            traced_script_module = torch.jit.trace(model, example)
+            return traced_script_module
         return model
 
 if __name__ == '__main__':
